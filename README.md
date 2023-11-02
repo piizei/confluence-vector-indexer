@@ -5,6 +5,10 @@ Currently, it supports Azure Cognitive Search, but it should be relatively easy 
 
 You need to set plenty of environment variables to make this work. See the .env.example file for a list of them.
 
+## Running
+You can run it with docker:
+`docker run --env-file .env ghcr.io/piizei/confluence-vector-indexer:latest`
+
 # DEV
 ## Prerequisites
 - poetry
