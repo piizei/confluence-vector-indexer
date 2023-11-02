@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "confluence-vector-sync"
+version = "0.1.0"
+description = "Sync confluence to vector database"
+authors = ["PJ"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+atlassian-python-api = "^3.41.3"
+python-dotenv = "^1.0.0"
+azure-search-documents = "^11.3.0"
+azure-identity = "^1.14.1"
+python-dateutil = "^2.8.2"
+langchain = "^0.0.325"
+openai = "^0.28.1"
+beautifulsoup4 = "^4.12.2"
+tiktoken = "^0.5.1"
+pytest = "^7.4.3"
+
+[tool.poetry.scripts]
+sync = "confluence_vector_sync.sync:sync"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
