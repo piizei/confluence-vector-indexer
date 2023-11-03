@@ -20,7 +20,7 @@ class AzureCognitiveSearchWrapper:
         self.endpoint = config["azure_search_endpoint"]
         self.index_name = config["azure_search_confluence_index"]
         self.spaces_indexed = []
-        self.full_reindex = False
+        self.full_reindex = config["azure_search_full_reindex"]
         self.embedder = OpenAIEmbeddings(deployment=config["azure_search_embedding_model"],
                                          chunk_size=1,
                                          )
@@ -50,7 +50,7 @@ class AzureCognitiveSearchWrapper:
                 last_modified_date = datetime.fromisoformat(doc["last_modified_date"])
                 last_indexed_date = datetime.fromisoformat(doc["last_indexed_date"])
                 upsert_date = datetime.fromisoformat(upsert["version"]["when"])
-                if last_modified_date < upsert_date:
+                if last_modified_date < upsert_date or self.full_reindex:
                     update.append(upsert)
                 if last_indexed_date > upsert_date and not self.full_reindex:
                     self.spaces_indexed.append(upsert["space"]["key"])

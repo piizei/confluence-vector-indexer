@@ -1,17 +1,18 @@
-from os import environ
+import os
 
 
 def get_config():
     return {
-        "search_type": environ.get("SEARCH_TYPE") if environ.get("SEARCH_TYPE") else "AZURE_COGNITIVE_SEARCH",
-        "azure_search_endpoint": environ.get("AZURE_SEARCH_ENDPOINT"),
-        "azure_search_key": environ.get("AZURE_SEARCH_KEY"),
-        "azure_search_embedding_model": environ.get("AZURE_SEARCH_EMBEDDING_MODEL"),
-        "azure_search_api_version": environ.get("AZURE_SEARCH_API_VERSION"),
-        "azure_search_confluence_index": environ.get("AZURE_SEARCH_CONFLUENCE_INDEX") if environ.get("AZURE_SEARCH_CONFLUENCE_INDEX") else "confluence",
-        "confluence_url": environ.get("CONFLUENCE_URL"),
-        "confluence_user_name": environ.get("CONFLUENCE_USER_NAME"),
-        "confluence_password": environ.get("CONFLUENCE_PASSWORD"),
-        "confluence_space_filter": environ.get("CONFLUENCE_SPACE_FILTER").split(",") if environ.get("CONFLUENCE_SPACE_FILTER") else [],
-        "confluence_test_space": environ.get("CONFLUENCE_TEST_SPACE"),
+        "search_type": os.getenv("SEARCH_TYPE", "AZURE_COGNITIVE_SEARCH"),
+        "azure_search_endpoint": os.getenv("AZURE_SEARCH_ENDPOINT"),
+        "azure_search_key": os.getenv("AZURE_SEARCH_KEY"),
+        "azure_search_full_reindex": os.getenv("AZURE_SEARCH_FULL_REINDEX", "false").lower() == "true",
+        "azure_search_embedding_model": os.getenv("AZURE_SEARCH_EMBEDDING_MODEL", "text-embedding-ada-002"),
+        "azure_search_api_version": os.getenv("AZURE_SEARCH_API_VERSION", "2023-07-01-Preview"),
+        "azure_search_confluence_index": os.getenv("AZURE_SEARCH_CONFLUENCE_INDEX", "confluence"),
+        "confluence_url": os.getenv("CONFLUENCE_URL"),
+        "confluence_user_name": os.getenv("CONFLUENCE_USER_NAME"),
+        "confluence_password": os.getenv("CONFLUENCE_PASSWORD"),
+        "confluence_space_filter": os.getenv("CONFLUENCE_SPACE_FILTER", "").split(","),
+        "confluence_test_space": os.getenv("CONFLUENCE_TEST_SPACE"),
     }
