@@ -2,6 +2,10 @@ import os
 
 
 def get_config():
+    extra_headers = []
+    for key, value in os.environ.items():
+        if key.startswith("CONFLUENCE_EXTRA_HEADER_KEY_"):
+            extra_headers.append({os.environ[key]: os.environ[key.replace('KEY', 'VALUE')]})
     return {
         "search_type": os.getenv("SEARCH_TYPE", "AZURE_COGNITIVE_SEARCH"),
         "azure_search_endpoint": os.getenv("AZURE_SEARCH_ENDPOINT"),
@@ -15,4 +19,6 @@ def get_config():
         "confluence_password": os.getenv("CONFLUENCE_PASSWORD"),
         "confluence_space_filter": os.getenv("CONFLUENCE_SPACE_FILTER", "").split(","),
         "confluence_test_space": os.getenv("CONFLUENCE_TEST_SPACE"),
+        "confluence_auth_method": os.getenv("CONFLUENCE_AUTH_METHOD", "PASSWORD"),
+        "confluence_extra_headers": extra_headers,
     }

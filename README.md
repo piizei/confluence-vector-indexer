@@ -5,6 +5,8 @@ Currently, it supports Azure Cognitive Search, but it should be relatively easy 
 
 You need to set plenty of environment variables to make this work. See the .env.example file for a list of them.
 
+It has been tested to work with both Cloud and Server version of confluence. It should in theory also work with the datacenter version (it uses the Confluence python SDK)🤞.
+
 ## Running
 You can run it with docker:
 `docker run --env-file .env ghcr.io/piizei/confluence-vector-indexer:latest`
@@ -31,6 +33,24 @@ table of configuration (environment) values
 | CONFLUENCE_SPACE_FILTER       | Comma separated list of Spaces in confluence (without whitespaces) that will be indexed. |                        |
 | CONFLUENCE_TEST_SPACE         | A space against which the integration test runs (your personal space for example)        |                        |
 | LOG_LEVEL                     | one of DEBUG, INFO, WARNING                                                              | WARNING                |
+| CONFLUENCE_AUTH_METHOD        | one of PASSWORD, TOKEN(*)                                                                | PASSWORD               |
+
+(*) The value of CONFLUENCE_PASSWORD variable is also used for token. 
+If password is set for CONFLUENCE_AUTH_METHOD, it uses BASIC authentication, and if Token is set, it sends the password (...token) as Bearer token.
+This is functionality of the confluence python SDK.
+
+### Very special configurations
+You can add custom headers to the requests to confluence by adding CONFLUENCE_HEADER_XXX variables, where XXX is the number of custom header-value pair.
+This is useful if you want for example to use Cloudflare Service Tokens to connect to on-prem confluence server.
+
+Example of using Cloudflare Service Tokens:
+
+| Name                            | Value                   |
+|---------------------------------|-------------------------|
+| CONFLUENCE_EXTRA_HEADER_KEY_1   | CF-Access-Client-Id     | 
+| CONFLUENCE_EXTRA_HEADER_KEY_2   | CF-Access-Client-Secret | 
+| CONFLUENCE_EXTRA_HEADER_VALUE_1 | 123.access              |                                                       | 
+| CONFLUENCE_EXTRA_HEADER_VALUE_2 | abc123qwertysecret      |
 
 
 # DEV

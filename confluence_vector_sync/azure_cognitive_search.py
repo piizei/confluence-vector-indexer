@@ -107,8 +107,7 @@ class AzureCognitiveSearchWrapper:
                 "last_indexed_date": self.now,
                 "url": url
             }
-
-        self.client.upload_documents(documents=[document])
+            self.client.upload_documents(documents=[document])
 
     def get_page(self, id: str) -> Dict:
         """Get a page from the search index"""
