@@ -37,7 +37,7 @@ table of configuration (environment) values
 
 (*) The value of CONFLUENCE_PASSWORD variable is also used for token. 
 If password is set for CONFLUENCE_AUTH_METHOD, it uses BASIC authentication, and if Token is set, it sends the password (...token) as Bearer token.
-This is functionality of the confluence python SDK.
+This is functionality of the confluence python SDK.gi
 
 ### Very special configurations
 You can add custom headers to the requests to confluence by adding CONFLUENCE_HEADER_XXX variables, where XXX is the number of custom header-value pair.
