@@ -3,13 +3,13 @@ import os
 
 from dotenv import load_dotenv
 
+from confluence_vector_sync import otel
 from confluence_vector_sync.config import get_config
 from confluence_vector_sync.confluence import confluence_from_config
 from confluence_vector_sync.search import search_from_config
-
-
 def sync():
     load_dotenv()
+    otel.setup()
     logging.getLogger().setLevel(level=os.getenv('LOG_LEVEL', 'WARNING').upper())
     logging.info("Indexing started")
     config = get_config()
