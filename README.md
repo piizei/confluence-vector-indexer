@@ -19,7 +19,7 @@ table of configuration (environment) values
 |-------------------------------|------------------------------------------------------------------------------------------|------------------------|
 | AZURE_SEARCH_ENDPOINT         | the URL of azure cognitive search                                                        |                        |
 | AZURE_SEARCH_KEY=             | Admin key for search. If not specified, should use managed identity.                     |                        |
-| AZURE_SEARCH_API_VERSION      | Version of cognitive search api (2023-07-01-Preview or later)                            | 2023-07-01-Preview     |
+| AZURE_SEARCH_API_VERSION      | Version of cognitive search api (2023-11-01 or later)                                    | 2023-11-01             |
 | AZURE_SEARCH_CONFLUENCE_INDEX | Index name to be created for confluence.                                                 | confluence             |
 | AZURE_SEARCH_EMBEDDING_MODEL  | The deployment name in Azure OpenAi or model name, usually text-embedding-ada-002        | text-embedding-ada-002 |
 | AZURE_SEARCH_FULL_REINDEX     | (true, false) Reindex every page (normally just the ones that changed after last index)  | false                  |
