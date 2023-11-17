@@ -101,6 +101,7 @@ class AzureCognitiveSearchWrapper:
                 "document_id": item["id"],
                 "space": item["space"]["key"],
                 "title": item["title"],
+                "titleVector": self.embedder.embed_query(item["title"]),
                 "chunk": chunk_text,
                 "chunkVector": self.embedder.embed_query(chunk_text),
                 "last_modified_date": last_modified_date,
@@ -142,9 +143,11 @@ class AzureCognitiveSearchWrapper:
                 {"name": "space", "type": "Edm.String", "searchable": "true", "retrievable": "true",
                  "filterable": "true"},
                 {"name": "title", "type": "Edm.String", "searchable": "true", "retrievable": "true"},
+                {"name": "titleVector", "type": "Collection(Edm.Single)", "searchable": "true", "retrievable": "true",
+                 "dimensions": 1536, "vectorSearchProfile": "default-vector-profile"},
                 {"name": "chunk", "type": "Edm.String", "searchable": "true", "retrievable": "true"},
                 {"name": "chunkVector", "type": "Collection(Edm.Single)", "searchable": "true", "retrievable": "true",
-                 "dimensions": 1536, "vectorSearchConfiguration": "vectorConfig"},
+                 "dimensions": 1536, "vectorSearchProfile": "default-vector-profile"},
                 {"name": "last_modified_date", "type": "Edm.DateTimeOffset", "searchable": "false",
                  "retrievable": "true", "filterable": "true"},
                 {"name": "last_indexed_date", "type": "Edm.DateTimeOffset", "searchable": "false",
@@ -152,12 +155,19 @@ class AzureCognitiveSearchWrapper:
                 {"name": "url", "type": "Edm.String", "searchable": "false", "retrievable": "true"}
             ],
             "vectorSearch": {
-                "algorithmConfigurations": [
+                "algorithms": [
                     {
-                        "name": "vectorConfig",
+                        "name": "hnsw-config-1",
                         "kind": "hnsw"
                     }
-                ]},
+                ],
+                "profiles": [
+                    {
+                        "name": "default-vector-profile",
+                        "algorithm": "hnsw-config-1",
+                    }    
+                ]
+             },
             "semantic": {
                 "configurations": [
                     {
