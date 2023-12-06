@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import time
@@ -13,6 +14,7 @@ from confluence_vector_sync.sync import sync
 
 load_dotenv()
 config = get_config()
+config["confluence_space_filter"] = [config["confluence_test_space"]]
 confluence = confluence_from_config(config)
 search = search_from_config(config)
 
@@ -29,10 +31,10 @@ def clean_index():
 def test_crud(clean_index):
     # Run the indexer once, and then assert that nothing changed
     # If something changed on wiki, then it got indexed and next time the test should work again :)
-    diagnostics = sync()
+    diagnostics = sync(config)
     assert_diagnostics(diagnostics)
     test_page = confluence.confluence.create_page(config["confluence_test_space"], "Test page", "<p>Test page</p>")
-    diagnostics = sync()
+    diagnostics = sync(config)
     assert_diagnostics(diagnostics, count_create=1)
     # Check that it was actually put into search index
     # Note that this only works with Azure Cognitive Search as it's using it's client directly
@@ -43,7 +45,7 @@ def test_crud(clean_index):
     # Update
     random_str = ''.join(random.choice(string.ascii_letters) for i in range(5))
     confluence.confluence.update_page(test_page["id"], f"<p>Test page updated {random_str}</p>")
-    diagnostics = sync()
+    diagnostics = sync(config)
     assert_diagnostics(diagnostics, count_update=1)
     time.sleep(5)
     doc = search.client.search(search_text=random_str,
@@ -51,7 +53,7 @@ def test_crud(clean_index):
                                filter=f"document_id eq '{test_page['id']}'")
     assert doc.get_count() == 1
     confluence.confluence.remove_page(test_page["id"])
-    diagnostics = sync()
+    diagnostics = sync(config)
     assert_diagnostics(diagnostics, count_remove=1)
     try:
         doc = search.client.get_document(key=f"{test_page['id']}_0")

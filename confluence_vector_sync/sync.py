@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Dict
 
 from dotenv import load_dotenv
 
@@ -7,12 +8,15 @@ from confluence_vector_sync import otel
 from confluence_vector_sync.config import get_config
 from confluence_vector_sync.confluence import confluence_from_config
 from confluence_vector_sync.search import search_from_config
-def sync():
+
+
+def sync(config: Dict[str, str] = None):
     load_dotenv()
     otel.setup()
     logging.getLogger().setLevel(level=os.getenv('LOG_LEVEL', 'WARNING').upper())
     logging.info("Indexing started")
-    config = get_config()
+    if not config:
+        config = get_config()
     confluence = confluence_from_config(config)
     confluence.space_filter = config["confluence_space_filter"]
     page_model = confluence.create_space_page_map()
@@ -28,6 +32,7 @@ def sync():
     logging.info("Indexing complete")
     logging.debug(search.diagnostics)
     return search.diagnostics
+
 
 # main
 if __name__ == "__main__":
