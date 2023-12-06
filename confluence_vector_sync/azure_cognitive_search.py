@@ -109,24 +109,6 @@ class AzureCognitiveSearchWrapper:
             }
             self.client.upload_documents(documents=[document])
 
-    def get_page(self, id: str) -> Dict:
-        """Get a page from the search index"""
-        resp = requests.post(self.endpoint + "/indexes/" + self.index + "/docs/" + id)
-
-    def get_pages(self, space: str) -> List[Dict]:
-        """Get all pages from a space
-            :returns: List of Dicts with Id and Last Modified Date
-        """
-
-        search_payload = {
-            "count": "true",
-            "search": "query",
-            "select": "",
-            "filter": ""
-        }
-
-        resp = requests.post(self.endpoint + "/indexes/" + self.index + "/docs/search",
-                             data=json.dumps(search_payload), headers=self.headers, params=self.params)
 
     def create_or_update_index(self):
         """Create or update the index with the latest schema
@@ -144,7 +126,7 @@ class AzureCognitiveSearchWrapper:
                 {"name": "title", "type": "Edm.String", "searchable": "true", "retrievable": "true"},
                 {"name": "chunk", "type": "Edm.String", "searchable": "true", "retrievable": "true"},
                 {"name": "chunkVector", "type": "Collection(Edm.Single)", "searchable": "true", "retrievable": "true",
-                 "dimensions": 1536, "vectorSearchConfiguration": "vectorConfig"},
+                 "dimensions": 1536, "vectorSearchProfile": "default-vector-profile"},
                 {"name": "last_modified_date", "type": "Edm.DateTimeOffset", "searchable": "false",
                  "retrievable": "true", "filterable": "true"},
                 {"name": "last_indexed_date", "type": "Edm.DateTimeOffset", "searchable": "false",
@@ -152,10 +134,15 @@ class AzureCognitiveSearchWrapper:
                 {"name": "url", "type": "Edm.String", "searchable": "false", "retrievable": "true"}
             ],
             "vectorSearch": {
-                "algorithmConfigurations": [
+                "algorithms": [
                     {
-                        "name": "vectorConfig",
+                        "name": "hnsw-config-1",
                         "kind": "hnsw"
+                    }],
+                "profiles": [
+                    {
+                        "name": "default-vector-profile",
+                        "algorithm": "hnsw-config-1"
                     }
                 ]},
             "semantic": {
@@ -179,8 +166,11 @@ class AzureCognitiveSearchWrapper:
         }
         resp = requests.put(self.endpoint + "/indexes/" + self.index_name, data=json.dumps(schema),
                             headers=self.headers, params=self.params)
+
         if resp.status_code > 299:
+            print(f'Could not create or update index, error {resp.text}')
             logging.error(f'Could not create or update index, error {resp.text}')
+            exit(-1)
 
     def text_to_base64(self, text: str):
         bytes_data = text.encode('utf-8')

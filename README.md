@@ -52,6 +52,11 @@ Example of using Cloudflare Service Tokens:
 | CONFLUENCE_EXTRA_HEADER_VALUE_1 | 123.access              |                                                       | 
 | CONFLUENCE_EXTRA_HEADER_VALUE_2 | abc123qwertysecret      |
 
+# Updates & Upgrades
+The Git tags match with the docker-container tags. The releases are not guaranteed to be backward compatible.
+Example of breaking change is the update of AI Search API version to 2023-11-01 (rel-0.7).
+The indexed fields are compatible (but more maybe added). This means the Chat application using the index should not break,
+but you would need to reindex the confluence. If it works, no need to update.
 
 # DEV
 ## Prerequisites
