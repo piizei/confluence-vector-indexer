@@ -62,7 +62,7 @@ class AzureCognitiveSearchWrapper:
         # remove items in changeset remove
         for item in changeset["remove"]:
             count = self.remove_item(item)
-            if count > 0: #The count is number of chunks, not documents
+            if count > 0:  # The count is number of chunks, not documents
                 self.diagnostics["counts"]["remove"] += 1
         # remove items that need to be updated ->
         # document is split in multiple search entries and we dont know how its going to chuck this time ->
@@ -79,7 +79,7 @@ class AzureCognitiveSearchWrapper:
     def remove_item(self, item):
         # Get all documents that match the document_id
         results = self.client.search(search_text="*",
-                                           filter="document_id eq '" + item["id"] + "'")
+                                     filter="document_id eq '" + item["id"] + "'")
         results = list(results)
         to_be_deleted = list(map(lambda x: {'id': x['id']}, results))
         if len(to_be_deleted) > 0:
@@ -109,7 +109,6 @@ class AzureCognitiveSearchWrapper:
                 "url": url
             }
             self.client.upload_documents(documents=[document])
-
 
     def create_or_update_index(self):
         """Create or update the index with the latest schema
@@ -147,14 +146,8 @@ class AzureCognitiveSearchWrapper:
                         "name": "default-vector-profile",
                         "algorithm": "hnsw-config-1"
                     }
-                ],
-                "profiles": [
-                    {
-                        "name": "default-vector-profile",
-                        "algorithm": "hnsw-config-1",
-                    }    
                 ]
-             },
+            },
             "semantic": {
                 "configurations": [
                     {
