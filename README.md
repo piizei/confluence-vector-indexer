@@ -1,7 +1,7 @@
 # Create vector indexes for confluence
 ## Introduction
 This application is intended to be used as a batch run. It should figure out itself what assets need to be updated.
-Currently, it supports Azure Cognitive Search, but it should be relatively easy to add other vector databases.
+Currently, it supports Azure AI Search, but it should be relatively easy to add other vector databases.
 
 You need to set plenty of environment variables to make this work. See the .env.example file for a list of them.
 
@@ -17,9 +17,9 @@ table of configuration (environment) values
 
 | Name                          | Description                                                                              | Default                |
 |-------------------------------|------------------------------------------------------------------------------------------|------------------------|
-| AZURE_SEARCH_ENDPOINT         | the URL of azure cognitive search                                                        |                        |
+| AZURE_SEARCH_ENDPOINT         | the URL of azure ai search                                                               |                        |
 | AZURE_SEARCH_KEY=             | Admin key for search. If not specified, should use managed identity.                     |                        |
-| AZURE_SEARCH_API_VERSION      | Version of cognitive search api (2023-11-01 or later)                                    | 2023-11-01             |
+| AZURE_SEARCH_API_VERSION      | Version of azure ai search api (2023-11-01 or later from rel1.0)                         | 2023-11-01             |
 | AZURE_SEARCH_CONFLUENCE_INDEX | Index name to be created for confluence.                                                 | confluence             |
 | AZURE_SEARCH_EMBEDDING_MODEL  | The deployment name in Azure OpenAi or model name, usually text-embedding-ada-002        | text-embedding-ada-002 |
 | AZURE_SEARCH_FULL_REINDEX     | (true, false) Reindex every page (normally just the ones that changed after last index)  | false                  |
@@ -61,19 +61,19 @@ but you would need to reindex the confluence. If it works, no need to update.
 # DEV
 ## Prerequisites
 - poetry
-- For Azure Cognitive Search, you need to have an Azure account and access to Azure OpenAI
+- For Azure AI Search, you need to have an Azure account and access to Azure OpenAI
 
 ## Testing
 Set your personal (or some other equivalent good testing space) to CONFLUENCE_TEST_SPACE and then run
 `poetry run pytest`
 
 ## Extending
-To add your own vector database, just implement the same interface as the AzureCognitiveSearch,
+To add your own vector database, just implement the same interface as the Azure AI Search,
 and add it to the search.py file.
 
 ## TODO
 - [ ] Figure out how to remember what removed pages are removed from index
-- [ ] Cognitive search skill
+- [ ] Azure AI search skill
 - [ ] Add more vector databases / search indexes
 - [ ] Figure out how to handle dependencies to various search engines
 
