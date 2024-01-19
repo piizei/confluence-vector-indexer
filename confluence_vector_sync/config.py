@@ -1,11 +1,22 @@
 import os
+# All the different handlers must be imported so that the dynamic loading works
+# Todo: Find a better way to do this
+from confluence_vector_sync.gpt_vision import GPTVisionMediaHandler
+from confluence_vector_sync.azure_document_intelligence import AzureDocumentIntelligenceMediaHandler
 
 
 def get_config():
     extra_headers = []
+    media_handlers = []
     for key, value in os.environ.items():
         if key.startswith("CONFLUENCE_EXTRA_HEADER_KEY_"):
             extra_headers.append({os.environ[key]: os.environ[key.replace('KEY', 'VALUE')]})
+        if key.startswith("MEDIA_HANDLER_KEY_"):
+            handler = globals()[os.environ[key.replace('KEY', 'VALUE')]]
+            config = os.environ[key.replace('KEY', 'CONFIG')]
+            media_types = os.environ[key].split(",")
+            for media_type in media_types:
+                media_handlers.append({media_type: handler(config)})
     return {
         "search_type": os.getenv("SEARCH_TYPE", "AZURE_COGNITIVE_SEARCH"),
         "azure_search_endpoint": os.getenv("AZURE_SEARCH_ENDPOINT"),
@@ -21,4 +32,7 @@ def get_config():
         "confluence_test_space": os.getenv("CONFLUENCE_TEST_SPACE"),
         "confluence_auth_method": os.getenv("CONFLUENCE_AUTH_METHOD", "PASSWORD"),
         "confluence_extra_headers": extra_headers,
+        "index_attachments": os.getenv("INDEX_ATTACHMENTS", "false").lower() == "true",
+        "attachment_indexer_type": os.getenv("ATTACHMENT_INDEXER_TYPE", "AZURE_DOCUMENT_INTELLIGENCE"),
+        "media_handlers": media_handlers,
     }

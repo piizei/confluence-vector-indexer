@@ -12,7 +12,8 @@ python-dotenv = "^1.0.0"
 azure-search-documents = "^11.4.0"
 azure-identity = "^1.14.1"
 python-dateutil = "^2.8.2"
-langchain = "^0.0.346"
+langchain = "^0.1.0"
+langchain-community = "^0.0.11"
 openai = "^0.28.1"
 beautifulsoup4 = "^4.12.2"
 tiktoken = "^0.5.1"
@@ -20,6 +21,9 @@ pytest = "^7.4.3"
 azure-core-tracing-opentelemetry = "^1.0.0b11"
 opentelemetry-instrumentation-requests = "^0.42b0"
 azure-monitor-opentelemetry = "^1.0.0"
+azure-ai-documentintelligence = "^1.0.0b1"
+
+
 
 [tool.poetry.scripts]
 sync = "confluence_vector_sync.sync:sync"

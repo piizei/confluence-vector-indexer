@@ -1,5 +1,7 @@
+import json
 from typing import Dict, List
-
+import os
+import tempfile
 import requests
 from atlassian import Confluence
 from bs4 import BeautifulSoup
@@ -11,6 +13,7 @@ class ConfluenceWrapper:
     space_filter: List[str] = []
     chunk_size = 8000
     chunk_overlap = 200
+    handle_attachments = False
 
     def __init__(self, url, username, password, auth_method="PASSWORD", extra_headers=[]):
         session = requests.Session()
@@ -26,6 +29,7 @@ class ConfluenceWrapper:
                                          username=username,
                                          token=password,
                                          session=session)
+        self.session = session
 
     def create_space_page_map(self) -> Dict[str, Dict]:
         """Creates a map of spaces with their pages"""
@@ -37,7 +41,7 @@ class ConfluenceWrapper:
                 results.append(result)
         else:
             while True:
-                iter_results = self.confluence.get_all_spaces(space_type='global', start=i, limit=i+100, expand=None)[
+                iter_results = self.confluence.get_all_spaces(space_type='global', start=i, limit=i + 100, expand=None)[
                     "results"]
                 if len(iter_results) == 0:
                     break
@@ -46,8 +50,18 @@ class ConfluenceWrapper:
 
         space_page_map = {}
         for space in results:
+            pages = self.get_pages(space["key"])
+            if self.handle_attachments:
+                for page in pages:
+                    try:
+                        attachments_container = self.confluence.get_attachments_from_content(page_id=page["id"])
+                    except:
+                        attachments_container = None
+                    if attachments_container and attachments_container["size"] > 0:
+                        page["attachments"] = attachments_container["results"]
+
             space_page_map[space["key"]] = {
-                "pages": self.get_pages(space["key"])
+                "pages": pages,
             }
         return space_page_map
 
@@ -80,6 +94,39 @@ class ConfluenceWrapper:
             return doc_chunks
         except:
             return []
+
+    def get_attachment_page_url(self, attachment: Dict) -> str:
+        return self.confluence.url + attachment["_links"]["download"]
+
+    def get_attachment_by_id(self, attachment_id: str) -> str:
+        try:
+            url = self.confluence.url + "api/v2/attachments/" + attachment_id
+            request = self.session.get(url, stream=True)
+            if request.status_code == 200:
+                item = json.loads(request.text)
+                if item["status"] == "trashed":
+                    return None
+                return item
+            else:
+                return None
+        except:
+            return None
+
+    def download_to_tempfile(self, attachment):
+        url = self.get_attachment_page_url(attachment)
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            # Send a HTTP request to the URL
+            response = self.session.get(url, stream=True)
+
+            # Check if the request is successful
+            if response.status_code == 200:
+                # Write the content to the temporary file
+                for chunk in response.iter_content(chunk_size=1024):
+                    if chunk:
+                        temp_file.write(chunk)
+
+            # Return the path of the temporary file
+            return temp_file.name
 
 
 def confluence_from_config(config: Dict[str, str]) -> ConfluenceWrapper:
