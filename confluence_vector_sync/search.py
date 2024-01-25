@@ -1,13 +1,13 @@
 from typing import Dict
 
-from confluence_vector_sync.azure_cognitive_search import AzureCognitiveSearchWrapper
+from confluence_vector_sync.azure_ai_search import AzureAISearchIndexer
 
 
-def search_from_config(config: Dict[str, str]):
+def search_indexer_from_config(config: Dict[str, str]):
 
     match config["search_type"]:
         case "AZURE_COGNITIVE_SEARCH":
-            return AzureCognitiveSearchWrapper(
+            return AzureAISearchIndexer(
                 config=config
             )
         case _:

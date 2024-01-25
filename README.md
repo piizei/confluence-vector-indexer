@@ -1,5 +1,15 @@
 # Create vector indexes for confluence
-## Introduction
+
+## Quick intro
+
+### What can I use this for?
+
+The indexer is a component in a Retrieval Augmented Generation (RAG) application. One example of such application is a chatbot that can answer questions from confluence.
+The indexer creates a vector index of confluence pages. This vector index is used from the chatbot to find the most relevant pages for the question.
+
+You don't neccessarily need anything else to build a working chatbot, for example once confluence is indexed to Azure AI Search, you chat with it using the [Azure AI Playground](https://learn.microsoft.com/en-us/azure/ai-services/openai/use-your-data-quickstart?tabs=command-line%2Cpython&pivots=programming-language-studio#chat-playground).
+
+## Usage
 This application is intended to be used as a batch run. It should figure out itself what assets need to be updated.
 Currently, it supports Azure AI Search, but it should be relatively easy to add other vector databases.
 
@@ -34,6 +44,7 @@ table of configuration (environment) values
 | CONFLUENCE_TEST_SPACE         | A space against which the integration test runs (your personal space for example)        |                        |
 | LOG_LEVEL                     | one of DEBUG, INFO, WARNING                                                              | WARNING                |
 | CONFLUENCE_AUTH_METHOD        | one of PASSWORD, TOKEN(*)                                                                | PASSWORD               |
+| INDEX_ATTACHMENTS             | Index also attachments (See attachment indexing for more info)                           | false                  |
 
 (*) The value of CONFLUENCE_PASSWORD variable is also used for token. 
 If password is set for CONFLUENCE_AUTH_METHOD, it uses BASIC authentication, and if Token is set, it sends the password (...token) as Bearer token.
@@ -51,6 +62,11 @@ Example of using Cloudflare Service Tokens:
 | CONFLUENCE_EXTRA_HEADER_KEY_2   | CF-Access-Client-Secret | 
 | CONFLUENCE_EXTRA_HEADER_VALUE_1 | 123.access              |                                                       | 
 | CONFLUENCE_EXTRA_HEADER_VALUE_2 | abc123qwertysecret      |
+
+## Attachment indexing
+The attachment indexing is not enabled by default. You can enable it by setting INDEX_ATTACHMENTS to true.
+The supported document types vary by the document indexer. The default implementation is Azure Document Intelligence that [supports PDFs, images, office files (docx, xlsx, pptx), and HTML.](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-retrieval-augumented-generation?view=doc-intel-4.0.0)
+Azure AI Document intelligence region must support preview api version 2023-10-31-preview (at this date East US. West US2. West Europe).
 
 # Updates & Upgrades
 The Git tags match with the docker-container tags. The releases are not guaranteed to be backward compatible.
