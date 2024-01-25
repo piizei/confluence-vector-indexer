@@ -11,6 +11,8 @@ from azure.search.documents import SearchClient
 from dateutil.parser import parse
 from langchain.embeddings import OpenAIEmbeddings
 
+from confluence_vector_sync.confluence import get_last_modified_attachment
+
 
 class AzureAISearchIndexer:
     datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -40,7 +42,7 @@ class AzureAISearchIndexer:
         # Sor them by date first
         create = []
         update = []
-        upserts = sorted(changeset["upsert"], key=lambda x: x["version"]["when"], reverse=True)
+        upserts = sorted(changeset["upsert"], key=lambda x: x["last_modified"], reverse=True)
         for upsert in upserts:
             space = upsert["space"]["key"]
             if space in self.spaces_indexed:
@@ -51,7 +53,7 @@ class AzureAISearchIndexer:
             if last_indexed_date is None:
                 create.append(upsert)
             else:
-                modified_in_confluence = datetime.fromisoformat(upsert["version"]["when"])
+                modified_in_confluence = upsert["last_modified"]
                 if last_modified_date_in_index < modified_in_confluence or self.full_reindex:
                     update.append(upsert)
                 if last_indexed_date > modified_in_confluence and not self.full_reindex:
@@ -84,7 +86,7 @@ class AzureAISearchIndexer:
             last_modified_date_in_index = datetime.fromisoformat(doc["last_modified_date"])
             last_indexed_date = datetime.fromisoformat(doc["last_indexed_date"])
         except:
-            # Not indexed
+            # not found in ai-search
             pass
         return last_indexed_date, last_modified_date_in_index
 
@@ -113,7 +115,7 @@ class AzureAISearchIndexer:
                 if last_indexed_date is None:
                     create = True
 
-                last_modified_in_confluence = self.get_last_modified_attachment(attachment)
+                last_modified_in_confluence = get_last_modified_attachment(attachment)
                 if last_modified_date_in_index < last_modified_in_confluence:
                     tmp_file = self.confluence.download_to_tempfile(attachment)
                     attachment_chunks = self.attachment_loader.load(tmp_file, attachment["metadata"]["mediaType"])
@@ -150,7 +152,7 @@ class AzureAISearchIndexer:
         item_id = item["id"]
 
         if attachment is None:
-            last_modified_date = parse(item["version"]["when"]).strftime(self.datetime_format)
+            last_modified_date = item["last_modified"].strftime(self.datetime_format)
             title_vector = self.embedder.embed_query(item["title"])
         else:
             item_type = "attachment:" + attachment["metadata"]["mediaType"]
@@ -161,7 +163,7 @@ class AzureAISearchIndexer:
             title = attachment["title"]
             if "comment" in attachment["metadata"]:
                 title = title + " - " + attachment["metadata"]["comment"]
-            epoch = self.get_last_modified_attachment(attachment)
+            epoch = get_last_modified_attachment(attachment)
             last_modified_date = epoch.strftime(self.datetime_format)
         for i, chunk in enumerate(chunks):
             document_id = f'{item_id}_{i}'
@@ -187,11 +189,6 @@ class AzureAISearchIndexer:
             })
         return docs
 
-    def get_last_modified_attachment(self, attachment):
-        return datetime.fromtimestamp(int(attachment["_links"]["download"]
-                                          .split("modificationDate=")[1]
-                                          .split("&")[0]) / 1000,
-                                      tz=timezone.utc)
 
     def add_to_attachment_cache(self, space: str, attachment: Dict):
         if not space in self.attachment_cache:
