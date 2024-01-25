@@ -1,6 +1,7 @@
 import json
 from typing import Dict, List
 import os
+from datetime import datetime, timezone
 import tempfile
 import requests
 from atlassian import Confluence
@@ -14,6 +15,7 @@ class ConfluenceWrapper:
     chunk_size = 8000
     chunk_overlap = 200
     handle_attachments = False
+    datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
 
     def __init__(self, url, username, password, auth_method="PASSWORD", extra_headers=[]):
         session = requests.Session()
@@ -51,14 +53,21 @@ class ConfluenceWrapper:
         space_page_map = {}
         for space in results:
             pages = self.get_pages(space["key"])
-            if self.handle_attachments:
-                for page in pages:
+            for page in pages:
+                if 'version' in page:
+                    page["last_modified"] = datetime.fromisoformat(page["version"]["when"])
+                if self.handle_attachments:
                     try:
                         attachments_container = self.confluence.get_attachments_from_content(page_id=page["id"])
                     except:
                         attachments_container = None
                     if attachments_container and attachments_container["size"] > 0:
                         page["attachments"] = attachments_container["results"]
+                        for result in attachments_container["results"]:
+                            if "_links" in result and "download" in result["_links"]:
+                                attachment_last_modified = get_last_modified_attachment(result)
+                                if attachment_last_modified > page["last_modified"]:
+                                    page["last_modified"] = attachment_last_modified
 
             space_page_map[space["key"]] = {
                 "pages": pages,
@@ -127,6 +136,13 @@ class ConfluenceWrapper:
 
             # Return the path of the temporary file
             return temp_file.name
+
+
+def get_last_modified_attachment(attachment) -> datetime:
+    return datetime.fromtimestamp(int(attachment["_links"]["download"]
+                                      .split("modificationDate=")[1]
+                                      .split("&")[0]) / 1000,
+                                  tz=timezone.utc)
 
 
 def confluence_from_config(config: Dict[str, str]) -> ConfluenceWrapper:

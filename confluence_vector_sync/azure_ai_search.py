@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from typing import List, Dict
 
@@ -119,6 +120,7 @@ class AzureAISearchIndexer:
                 if last_modified_date_in_index < last_modified_in_confluence:
                     tmp_file = self.confluence.download_to_tempfile(attachment)
                     attachment_chunks = self.attachment_loader.load(tmp_file, attachment["metadata"]["mediaType"])
+                    os.remove(tmp_file)
                     if attachment_chunks:
                         docs.extend(self.chunks_to_documents(attachment_chunks, item,
                                                              attachment=attachment))
