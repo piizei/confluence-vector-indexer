@@ -9,8 +9,7 @@ import requests
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
-from dateutil.parser import parse
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 
 from confluence_vector_sync.confluence import get_last_modified_attachment
 
@@ -27,7 +26,16 @@ class AzureAISearchIndexer:
         self.index_name = config["azure_search_confluence_index"]
         self.spaces_indexed = []
         self.full_reindex = config["azure_search_full_reindex"]
-        self.embedder = OpenAIEmbeddings(deployment=config["azure_search_embedding_model"],
+        # Check if env value contains 'azure'
+        if os.getenv("OPENAI_API_BASE", "").find("azure") > -1 or os.getenv("AZURE_OPENAI_ENDPOINT", None) is not None:
+            if os.getenv("AZURE_OPENAI_ENDPOINT ", None) is None:
+                os.environ["AZURE_OPENAI_ENDPOINT"] = os.getenv("OPENAI_API_BASE")
+                del os.environ["OPENAI_API_BASE"]
+            self.embedder = AzureOpenAIEmbeddings(azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT", ""),
+                                                  deployment=config["azure_search_embedding_model"],
+                                                  chunk_size=1)
+        else:
+            self.embedder = OpenAIEmbeddings(deployment=config["azure_search_embedding_model"],
                                          chunk_size=1,
                                          )
         self.now = datetime.utcnow().strftime(self.datetime_format)
@@ -148,14 +156,18 @@ class AzureAISearchIndexer:
         attachment_page_url = ""
         attachment_page_id = ""
         title_vector = []
-        title = item["title"]
+        if "title" in item:
+            title = item["title"]
+        else :
+            title = ""
         item_type = "page"
         url = f'{item["_links"]["self"].split("rest")[0]}display/{item["space"]["key"]}/{item["_links"]["webui"].split("/")[-1]}'
         item_id = item["id"]
 
         if attachment is None:
             last_modified_date = item["last_modified"].strftime(self.datetime_format)
-            title_vector = self.embedder.embed_query(item["title"])
+            if "title" in item:
+                title_vector = self.embedder.embed_query(item["title"])
         else:
             item_type = "attachment:" + attachment["metadata"]["mediaType"]
             attachment_page_url = url
