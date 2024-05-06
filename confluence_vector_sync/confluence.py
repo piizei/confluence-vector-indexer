@@ -12,8 +12,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 class ConfluenceWrapper:
     """Wrapper for Confluence API"""
     space_filter: List[str] = []
-    chunk_size = 8000
-    chunk_overlap = 200
+    chunk_size = 2000
+    chunk_overlap = 500
     handle_attachments = False
     datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
 
