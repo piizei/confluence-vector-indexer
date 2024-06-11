@@ -20,22 +20,20 @@ class ConfluenceWrapper:
 
     def __init__(self, url, username, password, auth_method="PASSWORD", extra_headers=[], ignore_ssl=False):
         session = requests.Session()
-        if ignore_ssl:
-            session.verify = False
-            urllib3.disable_warnings()
-            print("SSL verification disabled")
         for extra in extra_headers:
             session.headers.update(extra)
         if auth_method == "PASSWORD":
             self.confluence = Confluence(url=url,
                                          username=username,
                                          password=password,
-                                         session=session)
+                                         session=session,
+                                         verify_ssl=ignore_ssl)
         else:
             self.confluence = Confluence(url=url,
                                          username=username,
                                          token=password,
-                                         session=session)
+                                         session=session,
+                                         verify_ssl=ignore_ssl)
         self.session = session
 
     def create_space_page_map(self) -> Dict[str, Dict]:
