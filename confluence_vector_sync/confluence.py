@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timezone
 import tempfile
 import requests
+import urllib3
 from atlassian import Confluence
 from bs4 import BeautifulSoup
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -17,8 +18,12 @@ class ConfluenceWrapper:
     handle_attachments = False
     datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def __init__(self, url, username, password, auth_method="PASSWORD", extra_headers=[]):
+    def __init__(self, url, username, password, auth_method="PASSWORD", extra_headers=[], ignore_ssl=False):
         session = requests.Session()
+        if ignore_ssl:
+            session.verify = False
+            urllib3.disable_warnings()
+            print("SSL verification disabled")
         for extra in extra_headers:
             session.headers.update(extra)
         if auth_method == "PASSWORD":
@@ -151,4 +156,5 @@ def confluence_from_config(config: Dict[str, str]) -> ConfluenceWrapper:
                              username=config["confluence_user_name"],
                              password=config["confluence_password"],
                              auth_method=config["confluence_auth_method"],
-                             extra_headers=config["confluence_extra_headers"])
+                             extra_headers=config["confluence_extra_headers"],
+                             ignore_ssl=config["ignore_confluence_cert"])

@@ -35,4 +35,5 @@ def get_config():
         "index_attachments": os.getenv("INDEX_ATTACHMENTS", "false").lower() == "true",
         "attachment_indexer_type": os.getenv("ATTACHMENT_INDEXER_TYPE", "AZURE_DOCUMENT_INTELLIGENCE"),
         "media_handlers": media_handlers,
+        "ignore_confluence_cert": os.getenv("IGNORE_CONFLUENCE_CERT", "false").lower() == "true"
     }
